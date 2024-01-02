@@ -46,7 +46,7 @@ network:
   ethernets:
     enp42s0:
       addresses:
-        - 192.168.X.X/22
+        - 192.168.X.X/XX
       nameservers:
         addresses: [4.2.2.2, 8.8.8.8]
       routes:
