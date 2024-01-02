@@ -25,6 +25,11 @@ I've spent quite a bit of time over the last 12 months learning docker and linux
   - [Radarr](#radarr)
   - [qBittorrentVPN](#qbittorrentvpn)
   - [Arr Settings](#arr-settings)
+    - [Prowlarr Settings](#prowlarr-settings)
+    - [Sonarr Settings](#sonarr-settings)
+    - [Radarr Settings](#radarr-settings)
+  - [Plex](#plex)
+  - [Homarr](#homarr)
  
 # Hardware
 
@@ -288,3 +293,64 @@ I would recommend reading the qBittorrentVPN docker hub before deploying the sta
 Next we'll be going back to Prowlarr, Sonarr, and Radarr to finalize the settings. 
 
 # Arr Settings
+
+## Prowlarr Settings
+
+Now that we've got our main containers set up, we need to go back to add some things that we couldn't add before. First, go to Prowlarr and click settings then apps. Once there, click the + to add an app and select Radarr. Fill in the fields so they look similar to this:
+
+![prowlarr-apps](https://github.com/SupraTHICC/homelab-setup/assets/92880114/4352472a-96d6-4259-ac52-0e207fc1ba82)
+
+In the Prowlarr server and Radarr section, enter `http://serverIP:9696` for Prowlarr and `http://serverIP:7878` for Radarr as well as the API key in Settings/General, click test and the if you get a green check click save, you can then do the same to add Sonarr. Next, click download clients, click the + and select qBittorent(_I don't think a download client is needed in Prowlarr, but it's good practice_). Fill in the fields so they look similar to this:
+
+![prowlarr-download](https://github.com/SupraTHICC/homelab-setup/assets/92880114/a97bbce1-1652-46bf-887b-c0ba0ebf264a)
+
+Again, click test and if you get a green check, click save. Now click general and fill in the fields so they look similar to this:
+
+![prowlarr-host](https://github.com/SupraTHICC/homelab-setup/assets/92880114/1c9bd307-d638-4f9c-a834-13d36555abc1)
+
+That's about it for Prowlarr, now we can get Sonarr configured. 
+
+## Sonarr Settings
+
+Once you're at the Sonarr UI, click settings and click indexers. If you setup any indexers in Prowlarr, they should be populated here. Next, click download clients and enter the same information you entered in Prowlarr. And finally, click general and fill out the information the same as you did for Prowlarr.
+
+## Radarr Settings
+
+Just like Sonarr, you should fill out the same information as you did previously. Make sure to change anything that's specific to each container, such as port, if need be. Now that you have the indexers, apps, and download client set up, you should test a download to make sure everything is working. In Sonarr/Radarr, click Add new and search for a show or movie. These are the settings I typically use:
+
+![sonarr](https://github.com/SupraTHICC/homelab-setup/assets/92880114/5a0176a3-59db-44f8-ba41-f77c1c592ecf)
+
+Once you click add, go to qBittorrent and make sure it downloads. If you receive an error, SSH into your server and in your qbitvpn/qBittorent/data directory there should be a log which may help resolve the error. 
+
+# Plex
+
+_What is Plex_?
+
+> [Plex](https://hub.docker.com/r/linuxserver/plex) organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices. This container is packaged as a standalone Plex Media Server. Straightforward design and bulk actions mean getting things done faster.
+
+Now we'll get our Plex container set up. Head back to Portainer, add a stack, name it Plex, and you can use the example below as a starting point:
+```sh
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: host
+    volumes:
+    - /home/your-username-here/containers/plex:/config
+	  - /mnt/data/media:/media
+    environment:
+        - PUID=1000
+        - PGID=1000
+        - version=docker
+    ports:
+        - 32400:32400
+    restart: unless-stopped
+```
+Deploy the stack but this time instead of going to Plex in a browser, open CMD/PS and enter the following `ssh -L32400:localhost:32400 your-username@serverIP`. This will create a tunnel into your server, and you can now configure Plex. Once you're at `http://serverIP:32400` you'll need to create an account, if you don't currently have one, and then give your server a name once you've claimed it. When adding your libaries, make sure to point the movies library to `/media/movies` and the TV library to `/media/tv`. I haven't change much settings wise in Plex, other than allowing others access to my media. A couple of settings you should look at is "scan my library automatically" and remote access, other than that I usually leave all the settings on default. 
+
+# Homarr
+
+_What is Homarr?_
+
+> [Homarr](https://github.com/ajnart/homarr) - a sleek, modern dashboard that puts all of your apps and services at your fingertips. With Homarr, you can access and control everything in one convenient location. Homarr seamlessly integrates with the apps you've added, providing you with valuable information and giving you complete control.
+
