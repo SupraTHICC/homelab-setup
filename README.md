@@ -22,6 +22,9 @@ I've spent quite a bit of time over the last 12 months learning docker and linux
   - [Setup Portainer](#setup-portainer)
   - [Prowlarr](#prowlarr)
   - [Sonarr](#sonarr)
+  - [Radarr](#radarr)
+  - [qBittorrentVPN](#qbittorrentvpn)
+  - [Arr Settings](#arr-settings)
  
 # Hardware
 
@@ -178,7 +181,7 @@ services:
 [Note:](https://docs.linuxserver.io/general/understanding-puid-and-pgid/) `Using the PUID and PGID allows our containers to map the container's internal user to a user on the host machine.`
 TZ identifiers can be found [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)
 
-Once you've add your information and you're ready to start the container, click on "Deploy the stack". We need to now setup our indexers in Prowlarr, you can find a more in-depth guide [here](https://wiki.servarr.com/prowlarr/quick-start-guide), to do that go to `http://serverIP:9696` and you should see something similar to this:
+Once you've added your information and you're ready to start the container, click on "Deploy the stack". We need to now setup our indexers in Prowlarr, you can find a more in-depth guide [here](https://wiki.servarr.com/prowlarr/quick-start-guide), to do that go to `http://serverIP:9696` and you should see something similar to this:
 
 ![prowlarr](https://github.com/SupraTHICC/homelab-setup/assets/92880114/c86857ed-010b-4a47-9dba-0128db244726)
 
@@ -189,3 +192,99 @@ On the add indexer screen, you can either search for an indexer by name or you c
 _What is Sonarr?_
 
 > [Sonarr](https://docs.linuxserver.io/images/docker-sonarr/) (formerly NZBdrone) is a PVR for usenet and bittorrent users. It can monitor multiple RSS feeds for new episodes of your favorite shows and will grab, sort and rename them. It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available.
+
+It's time to add Sonarr. Head back to the Portainer UI, click stacks, and add stack. Name this one Sonarr and you can use the example below, modifying it if needed:
+```sh
+services:
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=America/New_York #Change to your TZ
+    volumes:
+        - /home/your-username-here/containers/sonarr:/config
+        - /mnt/data:/data
+    ports:
+        - 8989:8989
+    restart: unless-stopped
+```
+Click "Deploy the stack" and go to `http://serverIP:8989` to begin the setup. When you're at the Sonarr UI, click settings on the left side and then click media management. In media management click add root folder and select the folder `/data/media/tv`. We'll come back to Sonarr once Radarr and qBitorrent are setup.
+
+# Radarr
+
+_What is Radarr?_
+
+> [Radarr](https://github.com/Radarr/Radarr) is a movie collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new movies and will interface with clients and indexers to grab, sort, and rename them. It can also be configured to automatically upgrade the quality of existing files in the library when a better quality format becomes available.
+
+Once again, in the Portainer UI, add a stack, name this one Radarr and you can use the example below, modifying it if needed:
+```sh
+services:
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    hostname: radarr
+    environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=America/New_York
+    volumes:
+        - /home/your-username-here/containers/prowlarr:/config
+        - /mnt/data:/data
+    ports:
+        - 7878:7878
+    restart: unless-stopped
+```
+Click "Deploy the stack" and go to `http://serverIP:7878` to begin the setup. When you're at the Radarr UI, click settings on the left side and then click media management. In media management click add root folder and select the folder `/data/media/movies`. We'll come back to Radarr qBitorrent are setup.
+
+# qBittorrentVPN
+
+_What is qBittorentVPN?_
+
+> [qBittorrent](https://github.com/qbittorrent/qBittorrent) is a bittorrent client programmed in C++ / Qt that uses libtorrent (sometimes called libtorrent-rasterbar) by Arvid Norberg. It aims to be a good alternative to all other bittorrent clients out there. qBittorrent is fast, stable and provides unicode support as well as many features.
+> The [OpenVPN](https://openvpn.net/faq/what-is-openvpn/) Community Edition (CE) is an open source Virtual Private Network (VPN) project. It creates secure connections over the Internet using a custom security protocol that utilizes SSL/TLS. 
+
+The qBittorrentVPN docker hub can be found [here](https://hub.docker.com/r/dyonr/qbittorrentvpn/) which provides a lot of information and the environment variables that can be used. For this container you will need to have a VPN, if you choose to go with OpenVPN like I have you can find a list of supported VPN providers [here](https://haugene.github.io/docker-transmission-openvpn/supported-providers/). I use NordVPN, I know there are _better_ alternatives available but it's just what I'm used to, as well as OpenVPN. 
+
+In the Portainer UI, click add a stack and name this one qbitvpn. Below is an example of my settings which you will need to modify with your VPN providers info:
+```sh
+services:
+  qbitvpn:
+    image: dyonr/qbittorrentvpn:latest
+    container_name: qbitvpn
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    environment:
+      - VPN_ENABLED=yes
+      - VPN_TYPE=openvpn
+      - VPN_USERNAME=redacted
+      - VPN_PASSWORD=redacted
+      - NAME_SERVERS=1.1.1.1,1.0.0.1
+      - PUID=1000
+      - PGID=1000
+      - HEALTH_CHECK_HOST=www.google.com
+      - HEALTH_CHECK_INTERVAL=300
+      - HEALTH_CHECK_AMOUNT=10
+      - RESTART_CONTAINER=no
+      - LAN_NETWORK=192.168.X.X/XX
+    volumes:
+      - /home/your-username-here/containers/qbitvpn:/config
+      - /mnt/data/torrents:/data/torrents
+    ports:
+      - 8112:8080 #I've changed the host port to 8112 instead of 8080 as another container is already using it
+      - 8999:8999
+      - 8999:8999/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
+```
+I would recommend reading the qBittorrentVPN docker hub before deploying the stack, once you've done that deploy it and go to `http://serverIP:8112`(or whichever port you used) and enter the default credentials, which are `username: admin password: adminadmin`. Click on settings, then click the "webui" tab and change the default password to your own. Next, click on the "downloads" tab and your settings should look similar to this:
+
+![qbit](https://github.com/SupraTHICC/homelab-setup/assets/92880114/986aaf1f-93ee-41ae-9951-c9381f208302)
+
+Next we'll be going back to Prowlarr, Sonarr, and Radarr to finalize the settings. 
+
+# Arr Settings
