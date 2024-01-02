@@ -337,7 +337,7 @@ services:
     network_mode: host
     volumes:
     - /home/your-username-here/containers/plex:/config
-	  - /mnt/data/media:/media
+    - /mnt/data/media:/media
     environment:
         - PUID=1000
         - PGID=1000
