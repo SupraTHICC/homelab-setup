@@ -35,11 +35,25 @@ I could have gone with unraid or truenas, which would have worked just as well f
 
 Head over to https://ubuntu.com/download/server to download the Ubuntu Server ISO, then you'll need to either burn the ISO to a CD or create a bootable USB drive by using a program such as [rufus](https://rufus.ie/en/). You can dual boot with Windows, however, I will not be covering how to do that in this guide. If you choose to not dual boot, be aware that any data on your system may be lost. Once you've created the bootable drive, it's time to install Ubuntu Server on your system. 
 
-With your system turned off, insert the USB drive and power on your system. If your system doesn't automatically boot from the USB, you will have to restart and enter the boot menu by rapidly pressing the ESC key, F2 key, F10 key, or the F12 key. Generally there will be an on-screen message that says which key is required to enter the boot menu at POST. Once the boot menu appears, select the USB drive and follow the prompts to complete installation. You can find an in-depth walkthrough [here](https://ubuntu.com/tutorials/install-ubuntu-server#1-overview), the main things I'd suggest paying attention to is the username and the server name you select, and make sure "Install OenSSH server" is selected. If you have multiple drives for your server, you'll also more than likely want to setup RAID. I went with RAID0 as nothing on my server is super important, but if you plan on storing important files on your server then you'll probably want to go with RAID5 or higher. Setting up RAID is out of scope for this guide, but I'll provide a walkthrough [here](https://support.us.ovhcloud.com/hc/en-us/articles/360006076940-How-to-Configure-Software-RAID-on-Ubuntu-18-04).
+With your system turned off, insert the USB drive and power on your system. If your system doesn't automatically boot from the USB, you will have to restart and enter the boot menu by rapidly pressing the ESC key, F2 key, F10 key, or the F12 key. Generally there will be an on-screen message that says which key is required to enter the boot menu at POST. Once the boot menu appears, select the USB drive and follow the prompts to complete installation. You can find an in-depth walkthrough [here](https://ubuntu.com/tutorials/install-ubuntu-server#1-overview), the main things I'd suggest paying attention to is the username and the server name you select, and make sure "Install OpenSSH server" is selected. If you have multiple drives for your server, you'll also more than likely want to setup RAID. I went with RAID0 as nothing on my server is super important, but if you plan on storing important files on your server then you'll probably want to go with RAID5 or higher. Setting up RAID is out of scope for this guide, but I'll provide a walkthrough [here](https://support.us.ovhcloud.com/hc/en-us/articles/360006076940-How-to-Configure-Software-RAID-on-Ubuntu-18-04).
 
 # Server Network
 
-
+While not entirely necessary, I've gone ahead and given my server a static IP. Most routers will allow you to do it in the gui, however, I've set it up on my server. Follow the instructions below if you'd like to do the same. First, you need to identify the available interfaces by using the command `ip a`, make note of the interface name and subnet mask your network uses. Now create the netplan config using the command `sudo nano /etc/netplan/99_config.yaml`. I've provided my config below as an example, but you will need to change things to suite your network:
+```sh
+network:
+  renderer: networkd
+  ethernets:
+    enp42s0:
+      addresses:
+        - 192.168.X.X/22
+      nameservers:
+        addresses: [4.2.2.2, 8.8.8.8]
+      routes:
+        - to: default
+          via: 192.168.X.X
+  version: 2
+```
 
 # Firewall
 
@@ -58,7 +72,7 @@ We will need to allow more ports later in this guide, but this should be fine fo
 
 # Directory Setup
 
-Once Unbuntu Server is installed and booted, you can either continue using the CLI or you can SSH to the server from another computer using command prompt(CMD) or PowerShell(PS) using the following command `ssh yourusername@yourserverIP`. Now it's time to setup some directories where your files will be stored. One thing to keep in mind when setting up directories is hard links and instant moves, which you can read up on at [trash guides](https://trash-guides.info/Hardlinks/Hardlinks-and-Instant-Moves/), but basically a hard link makes it possible to have a file or files in multiple locations without taking up two, three, or more times the amount of space the single file does.
+Once Ubuntu Server is installed and booted, you can either continue using the CLI or you can SSH to the server from another computer using command prompt(CMD) or PowerShell(PS) using the following command `ssh yourusername@yourserverIP`. Now it's time to setup some directories where your files will be stored. One thing to keep in mind when setting up directories is hard links and instant moves, which you can read up on at [trash guides](https://trash-guides.info/Hardlinks/Hardlinks-and-Instant-Moves/), but basically a hard link makes it possible to have a file or files in multiple locations without taking up two, three, or more times the amount of space the single file does.
 
 Now we'll setup a directory for our movies & tv shows files. While at the CLI, enter the commands `mkdir /mnt/data`, this is the directory where our files for movies and tv shows will be stored. Next, switch to the data directory and create the directories we need by using the commands `cd /mnt/data` and `mkdir media torrents`, now we'll create the directories for movies and tv by using the commands `cd /mnt/data/media` and `mkdir movies tv`. Now all we need to do is change the permissions by using the commands `sudo chown -R $USER:$USER /data` and `sudo chmod -R a=,a+rX,u+w,g+w /data`.
 
@@ -131,3 +145,4 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 ```
+Now we're ready to start your first container, use the command `docker-compose up -d` and once it shows that the container is up you can log into the web ui by going to `http://serverIP:9443`.
