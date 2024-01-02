@@ -20,6 +20,8 @@ I've spent quite a bit of time over the last 12 months learning docker and linux
   - [Directory Setup](#directory-setup)
   - [Install Docker and Docker-Compose](#install-docker-and-docker-compose)
   - [Setup Portainer](#setup-portainer)
+  - [Prowlarr](#prowlarr)
+  - [Sonarr](#sonarr)
  
 # Hardware
 
@@ -68,7 +70,7 @@ sudo ufw logging on
 sudo ufw enable
 sudo ufw status
 ```
-We will need to allow more ports later in this guide, but this should be fine for now.
+If you find you're unable to connect to any of the containers setup in this guide, make sure to add it to ufw by using `sudo ufw allow <required port>`.
 
 # Directory Setup
 
@@ -76,7 +78,7 @@ Once Ubuntu Server is installed and booted, you can either continue using the CL
 
 Now we'll setup a directory for our movies & tv shows files. While at the CLI, enter the commands `mkdir /mnt/data`, this is the directory where our files for movies and tv shows will be stored. Next, switch to the data directory and create the directories we need by using the commands `cd /mnt/data` and `mkdir media torrents`, now we'll create the directories for movies and tv by using the commands `cd /mnt/data/media` and `mkdir movies tv`. Now all we need to do is change the permissions by using the commands `sudo chown -R $USER:$USER /data` and `sudo chmod -R a=,a+rX,u+w,g+w /data`.
 
-Next we'll get our container directory setup by using the command `cd` to get back to your home directory, followed by `mkdir containers`. and finally `sudo ln -s $HOME/containers /mnt/data/`. This will create a symolic link between our containers directory and the directories where our files will be stored. Be aware, using `sudo` runs commands as root, or administrator, so be careful when using sudo. We're only going to setup one directory in containers for Portainer, so use the commands `cd containers` and `mkdir portainer/data`.
+Next we'll get our container directory setup by using the command `cd` to get back to your home directory, followed by `mkdir containers`. and finally `sudo ln -s $HOME/containers /mnt/data/`. This will create a symolic link between our containers directory and the directories where our files will be stored. Be aware, using `sudo` runs commands as root, or administrator, so be careful when using sudo. First we'll setup a directory for Portainer, so use the commands `cd containers` and `mkdir portainer/data`. Next, we'll create the directories for the rest of the containers using the command `mkdir prowlarr sonarr radarr plex homarr watchtower tautulli overseerr speedtest qbitvpn nginx`
 
 # Install Docker and Docker-Compose
 
@@ -126,7 +128,7 @@ _What is Portainer?_
 
 When I first started my homelab server I was using one large yml file with a bunch of containers nested inside, I found it started to become cumbersome to modify so I wanted something to make the process of managing containers even simpler than a yml file. That's when I found Portainer, I find it makes the process of setting up, modifying, and deleting containers very easy. As their description says, it really does make it so easy anyone can do it.
 
-Docker-compose uses a yml(yet another markup language) file to create and maintain docker containers, to create the yml file for Portainer change to the `portainer` directory. If you're at home, you can use the command `cd containers/portainer/`. Next, use the command `sudo nano docker-compose.yml` to create the yml. We'll be setting up Portainer CE, you can find the official install documentary [here](https://docs.portainer.io/start/install-ce). I've provided an example of my docker-compose.yml with the portainer entry in it, I've also commented out some explanations:
+Docker-compose uses a yml(yet another markup language) file to create and maintain docker containers, to create the yml file for Portainer change to the `portainer` directory. If you're at home, you can use the command `cd containers/portainer/`. Next, use the command `sudo nano docker-compose.yml` to create the yml. We'll be setting up Portainer CE, you can find the official install document [here](https://docs.portainer.io/start/install-ce). I've provided an example of my docker-compose.yml with the portainer entry in it, I've also commented out some explanations:
 ```sh
 version: "3"
 networks:
@@ -145,4 +147,45 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 ```
-Now we're ready to start your first container, use the command `docker-compose up -d` and once it shows that the container is up you can log into the web ui by going to `http://serverIP:9443`.
+Now we're ready to start your first container, use the command `docker-compose up -d` and once it shows that the container is up, enter `http://serverIP:9443` in your browser of choice to begin the [setup](https://docs.portainer.io/start/install-ce/server/setup) process. Once you've setup an admin account and you've created the local environment, click on "local" and you should see something similar to this:
+
+![Portainer](https://github.com/SupraTHICC/homelab-setup/assets/92880114/ccd85f13-070c-465f-b1f5-1eb50f7421fb)
+
+Once you're at the dashboard, click on stacks and in the top right click "Add stack". The first container we're going to create is Prowlarr.
+
+# Prowlarr
+
+_What is Prowlarr?_
+
+> [Prowlarr](https://docs.linuxserver.io/images/docker-prowlarr/) is a indexer manager/proxy built on the popular arr .net/reactjs base stack to integrate with your various PVR apps. Prowlarr supports both Torrent Trackers and Usenet Indexers. It integrates seamlessly with Sonarr, Radarr, Lidarr, and Readarr offering complete management of your indexers with no per app Indexer setup required (we do it all).
+
+Now that you're at the add stack screen and you're on web editor, give your stack a name and enter the following:
+```sh
+services:
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC #Change this to your TZ
+    volumes:
+      - /home/your-username-here/containers/prowlarr:/config 
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+```
+[Note:](https://docs.linuxserver.io/general/understanding-puid-and-pgid/) `Using the PUID and PGID allows our containers to map the container's internal user to a user on the host machine.`
+TZ identifiers can be found [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)
+
+Once you've add your information and you're ready to start the container, click on "Deploy the stack". We need to now setup our indexers in Prowlarr, you can find a more in-depth guide [here](https://wiki.servarr.com/prowlarr/quick-start-guide), to do that go to `http://serverIP:9696` and you should see something similar to this:
+
+![prowlarr](https://github.com/SupraTHICC/homelab-setup/assets/92880114/c86857ed-010b-4a47-9dba-0128db244726)
+
+On the add indexer screen, you can either search for an indexer by name or you can scroll through the list. I don't have a lot of indexers, but I mainly use 1337x, LimeTorrents, and TorrentFunk. After you've selected an indexer, select one of the URLs in base URL, click test and if it comes back with a green check, click save. Once we've setup Radarr, Sonarr and qBittorrent, we'll come back to Prowlarr to add them.
+
+# Sonarr
+
+_What is Sonarr?_
+
+> [Sonarr](https://docs.linuxserver.io/images/docker-sonarr/) (formerly NZBdrone) is a PVR for usenet and bittorrent users. It can monitor multiple RSS feeds for new episodes of your favorite shows and will grab, sort and rename them. It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available.
