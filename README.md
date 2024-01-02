@@ -29,7 +29,7 @@ Ubuntu Server is a very light weight OS, the recommended system requirements are
     RAM: 1 gigabyte or more
     Disk: a minimum of 2.5 gigabytes
 ```
-I could have gone with unraid or truenas, which would have worked just as well for my setup, but I had some previous experience with Ubuntu Server so it made sense for me to go that route. My server is running on a 5600G, 16GB, and I have two 4TD WD REDs for storage. It's a good idea to have a dedicate GPU for encoding, however, I've not had any issues with my current setup.
+I could have gone with unraid or truenas, which would have worked just as well for my setup, but I had some previous experience with Ubuntu Server so it made sense for me to go that route. My server is running on a 5600G, 16GB, and I have two 4TD WD REDs for storage. It's a good idea to have a dedicate GPU for transcoding, however, I've not had any issues with my current setup.
 
 # Installing Ubuntu Server
 
