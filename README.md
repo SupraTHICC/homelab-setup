@@ -2,7 +2,7 @@
 
 _Disclaimer: This guide is not meant to encourage or support piracy._
 
-I've spent quite a bit of time over the last 12 months learning docker and linux, testing out different containers, and fine tuning a few to fit my needs. I don't consider myself a docker or linux pro by any means, I've made a few mistakes with my setup and I'm sure the ones I'll be sharing here could be better, but I wanted to create this guide for other people like me that enjoy spending time learning new things. This guide is primarily aimed at anyone that doesn't have an in-depth knowledge of both docker and linux, and will cover the steps needed to:
+I've spent quite a bit of time over the last 12 months learning docker and linux, testing out different containers, and fine tuning a few to fit my needs. I don't consider myself a docker or linux pro by any means, I've made a few mistakes with my setup and I'm sure the ones I'll be sharing here could be better, but I wanted to create this guide for people like me that enjoy learning through trial and error. This guide is primarily aimed at anyone that doesn't have an in-depth knowledge of both docker and linux, and will cover the steps needed to:
 
 - Install & setup Ubuntu Server on a desktop/laptop
 - Setup Docker and Docker-Compose
