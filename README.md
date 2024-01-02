@@ -300,7 +300,7 @@ Now that we've got our main containers set up, we need to go back to add some th
 
 ![prowlarr-apps](https://github.com/SupraTHICC/homelab-setup/assets/92880114/4352472a-96d6-4259-ac52-0e207fc1ba82)
 
-In the Prowlarr server and Radarr section, enter `http://serverIP:9696` for Prowlarr and `http://serverIP:7878` for Radarr as well as the API key in Settings/General, click test and the if you get a green check click save, you can then do the same to add Sonarr. Next, click download clients, click the + and select qBittorent(_I don't think a download client is needed in Prowlarr, but it's good practice_). Fill in the fields so they look similar to this:
+In the Prowlarr server and Radarr section, enter `http://serverIP:9696` for Prowlarr and `http://serverIP:7878` for Radarr as well as the API key in Radarr that can be found in settings>general, click test and the if you get a green check click save, you can then do the same to add Sonarr. Next, click download clients, click the + and select qBittorent(_I don't think a download client is needed in Prowlarr, but it's good practice_). Fill in the fields so they look similar to this:
 
 ![prowlarr-download](https://github.com/SupraTHICC/homelab-setup/assets/92880114/a97bbce1-1652-46bf-887b-c0ba0ebf264a)
 
