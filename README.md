@@ -30,6 +30,9 @@ I've spent quite a bit of time over the last 12 months learning docker and linux
     - [Radarr Settings](#radarr-settings)
   - [Plex](#plex)
   - [Homarr](#homarr)
+  - [Watchtower](#watchtower)
+  - [Tautulli](#tautulli)
+  - [Overseerr](#overseerr)
  
 # Hardware
 
@@ -354,3 +357,93 @@ _What is Homarr?_
 
 > [Homarr](https://github.com/ajnart/homarr) - a sleek, modern dashboard that puts all of your apps and services at your fingertips. With Homarr, you can access and control everything in one convenient location. Homarr seamlessly integrates with the apps you've added, providing you with valuable information and giving you complete control.
 
+![homarr](https://github.com/SupraTHICC/homelab-setup/assets/92880114/ffb31516-f7f5-49a5-a788-b9297e6d852b)
+
+Homarr is one of the more recent additions to my homelab, and I can't believe I've gone this long without it. You can enable pings for the apps that you add which will show if they're up or down, the calendar will show up coming release dates for series you have monitored, what's playing on plex and by whom, just to name a few of its features. Add a stack, name it Homarr, and you can use the example below as a starting point:
+```sh
+services:
+  homarr:
+    container_name: homarr
+    image: ghcr.io/ajnart/homarr:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
+      - /home/your-username-here/containers/homarr:/app/data/configs
+      - /home/your-username-here/containers/homarr:/app/public/icons
+      - /mnt/data:/data
+    ports:
+      - 7575:7575
+```
+Deploy the stack and make your way over to `http://serverIP:7575`, create your admin account and then try out edit mode(pencil looking icon in the top right). Click add a tile and add one of the apps you've set up, add a name and enter `http://serverIP:container-port` for the app you're adding then click integration. If you've added an app that's on the list, such as Radarr, click it and enter your information. 
+
+# Watchtower
+
+_What is Watchtower?_
+
+> With [watchtower](https://github.com/containrrr/watchtower) you can update the running version of your containerized app simply by pushing a new image to the Docker Hub or your own image registry. Watchtower will pull down your new image, gracefully shut down your existing container and restart it with the same options that were used when it was deployed initially.
+
+Another newer addition that I can't believe I've gone this long without. As the description says, this container will automatically pull new images, shut down your container, update the container and then bring it back up. You can use the settings below as a starting point:
+```sh
+services:
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_STOPPED=true
+      - WATCHTOWER_POLL_INTERVAL=3600
+      - WATCHTOWER_REVIVE_STOPPED=true
+    restart: unless-stopped
+```
+Deploy the stack then click on the container, on the container page click logs and you should see that it's scheduled to check for updates in about an hour.
+
+# Tautulli
+
+_What is Tautulli?_
+
+> [Tautulli](https://docs.linuxserver.io/images/docker-tautulli/) is a python based web application for monitoring, analytics and notifications for Plex Media Server.
+
+If you like statistics then you'll probably like this container. It tracks a ton of stats from your Plex server such as most watched shows, most active users, most active libraries etc. You can use the settings below as a starting point:
+```sh
+services:
+  tautulli:
+    image: ghcr.io/tautulli/tautulli
+    container_name: tautulli
+    restart: unless-stopped
+    volumes:
+      - /home/your-username-here/containers/tautulli:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=#Enter your time zone
+    ports:
+      - 8181:8181
+```
+Deploy the stack and go to `http://serverIP:8181`, you should be able to log in with your Plex account. Most of the settings here can be left on default.
+
+# Overseerr
+
+_What is Overseerr?_
+
+> Overseerr is a request management and media discovery tool built to work with your existing Plex ecosystem.
+
+![overseerr](https://github.com/SupraTHICC/homelab-setup/assets/92880114/a3b6c7ef-82a6-4079-8034-a9d5b4d1c398)
+
+If you have, or plan to have, other users with access to your Plex library then this container is a must have. When a user requests a show or movie, it gets added to your queue to approve. Once approved it is then automatically added to Radarr/Sonarr and begins downloading. You can use the settings below as a starting point:
+```sh
+services:
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=#Enter your time zone
+    volumes:
+      - home/your-username-here/containers/overseerr:/config
+    ports:
+      - 5055:5055
+    restart: unless-stopped
+```
+Deploy the stack and go to `http://serverIP:5055`
