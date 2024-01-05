@@ -215,7 +215,9 @@ services:
       - 9696:9696
     restart: unless-stopped
 ```
-[Note:](https://docs.linuxserver.io/general/understanding-puid-and-pgid/) `Using the PUID and PGID allows our containers to map the container's internal user to a user on the host machine.`
+> [!NOTE]
+> [Using](https://docs.linuxserver.io/general/understanding-puid-and-pgid/) the PUID and PGID allows our containers to map the container's internal user to a user on the host machine.
+
 TZ identifiers can be found [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)
 
 Once you've added your information and you're ready to start the container, click on "Deploy the stack". We need to now setup our indexers in Prowlarr, you can find a more in-depth guide [here](https://wiki.servarr.com/prowlarr/quick-start-guide), to do that go to `http://serverIP:9696` and you should see something similar to this:
