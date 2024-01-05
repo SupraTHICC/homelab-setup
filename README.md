@@ -123,7 +123,7 @@ Next we'll get our container directory setup by using the command `cd` to get ba
 
 # Install Docker and Docker-Compose
 
-The official instructions can be found [here]([https://trash-guides.info/Hardlinks/Hardlinks-and-Instant-Moves/](https://docs.docker.com/engine/install/ubuntu/#install-docker-ce-1)https://docs.docker.com/engine/install/ubuntu/#install-docker-ce-1), but I'll be including everything you should need in this guide. We'll start by removing any conflicting packages by running the command: 
+The official instructions can be found [here](https://trash-guides.info/Hardlinks/Hardlinks-and-Instant-Moves/](https://docs.docker.com/engine/install/ubuntu/#install-docker-ce-1)https://docs.docker.com/engine/install/ubuntu/#install-docker-ce-1), but I'll be including everything you should need in this guide. We'll start by removing any conflicting packages by running the command: 
 ```sh
 for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
 ```
