@@ -160,6 +160,15 @@ And verify it has been installed correctly:
 ```sh
 docker compose version
 ```
+Then run
+```sh
+sudo apt install docker-compose
+```
+And finally, add your user to the docker group
+```sh
+sudo gpasswd -a $USER docker
+newgrp docker
+```
 
 # Setup Portainer
 
@@ -188,11 +197,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 ```
-Now we're ready to start your first container, use the command `docker-compose up -d` and once it shows that the container is up, enter `http://serverIP:9443` in your browser of choice to begin the [setup](https://docs.portainer.io/start/install-ce/server/setup) process. Once you've setup an admin account and you've created the local environment, click on "local" and you should see something similar to this:
+Now we're ready to start your first container, use the command `docker-compose up -d` and once it shows that the container is up, enter `http://serverIP:9443` in your browser of choice to begin the [setup](https://docs.portainer.io/start/install-ce/server/setup) process. Setup an admin account and click "Get Started" to create the local environment, click on "local" and you should see something similar to this:
 
 ![Portainer](https://github.com/SupraTHICC/homelab-setup/assets/92880114/ccd85f13-070c-465f-b1f5-1eb50f7421fb)
 
-Once you're at the dashboard, click on stacks and in the top right click "Add stack". The first container we're going to create is Prowlarr.
+Once you're at the dashboard, click on stacks and in the top right click "Add stack". The first container we're going to create is prowlarr.
 
 # Prowlarr
 
@@ -250,7 +259,7 @@ services:
         - 8989:8989
     restart: unless-stopped
 ```
-Click "Deploy the stack" and go to `http://serverIP:8989` to begin the setup. When you're at the Sonarr UI, click settings on the left side and then click media management. In media management click add root folder and select the folder `/data/media/tv`. We'll come back to Sonarr once Radarr and qBitorrent are setup.
+Click "Deploy the stack" and go to `http://serverIP:8989` to begin the setup. When you're at the Sonarr UI and have setup the authentication settings, click settings on the left side and then click media management. In media management click add root folder and select the folder `/data/media/tv`. We'll come back to Sonarr once Radarr and qBitorrent are setup.
 
 # Radarr
 
@@ -270,13 +279,13 @@ services:
         - PGID=1000
         - TZ=America/New_York
     volumes:
-        - /home/your-username-here/containers/prowlarr:/config
+        - /home/your-username-here/containers/radarr:/config
         - /mnt/data:/data
     ports:
         - 7878:7878
     restart: unless-stopped
 ```
-Click "Deploy the stack" and go to `http://serverIP:7878` to begin the setup. When you're at the Radarr UI, click settings on the left side and then click media management. In media management click add root folder and select the folder `/data/media/movies`. We'll come back to Radarr qBitorrent are setup.
+Click "Deploy the stack" and go to `http://serverIP:7878` to begin the setup. When you've finished the authentication setup and you're at the Radarr UI, click settings on the left side and then click media management. In media management click add root folder and select the folder `/data/media/movies`. We'll come back to Radarr once qBitorrent is setup.
 
 # qBittorrentVPN
 
@@ -287,7 +296,7 @@ _What is qBittorentVPN?_
 
 The qBittorrentVPN docker hub can be found [here](https://hub.docker.com/r/dyonr/qbittorrentvpn/) which provides a lot of information and the environment variables that can be used. For this container you will need to have a VPN, if you choose to go with OpenVPN like I have you can find a list of supported VPN providers [here](https://haugene.github.io/docker-transmission-openvpn/supported-providers/). I use NordVPN, I know there are _better_ alternatives available but it's just what I'm used to, as well as OpenVPN. 
 
-In the Portainer UI, click add a stack and name this one qbitvpn. Below is an example of my settings which you will need to modify with your VPN providers info:
+First. create a new directory in the qbitvpn directory and name it openvpn, you will then need to get .ovpn files from your VPN provider and copy them to the openvpn. Make sure they're named exactly how they were named when you got them from your VPN provider. In the Portainer UI, click add a stack and name this one qbitvpn. Below is an example of my settings which you will need to modify with your VPN providers info:
 ```sh
 services:
   qbitvpn:
@@ -309,7 +318,7 @@ services:
       - HEALTH_CHECK_INTERVAL=300
       - HEALTH_CHECK_AMOUNT=10
       - RESTART_CONTAINER=no
-      - LAN_NETWORK=192.168.X.X/XX
+      - LAN_NETWORK=192.168.X.X/XX #i.e 192.168.1.0
     volumes:
       - /home/your-username-here/containers/qbitvpn:/config
       - /mnt/data/torrents:/data/torrents
