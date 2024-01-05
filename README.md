@@ -13,6 +13,7 @@ I've spent quite a bit of time over the last 12 months learning docker and linux
 
 - [Homelab Setup Guide - Introduction](#homelab-setup-guide---introduction)
   - [Table of Contents](#table-of-contents)
+  - [Command Glossary](#command-glossary)
   - [Hardware](#hardware)
   - [Installing Ubuntu Server](#installing-ubuntu-server)
   - [Server Network](#server-network)
@@ -33,7 +34,32 @@ I've spent quite a bit of time over the last 12 months learning docker and linux
   - [Watchtower](#watchtower)
   - [Tautulli](#tautulli)
   - [Overseerr](#overseerr)
+  - [Speedtest Tracker](#speedtest-tracker)
+  - [Nginx Proxy Manager](#nginx-proxy-manager)
+  - [Final Thoughts](#final-thoughts)
  
+# Command Glossary
+
+Not all of these commands will be used in this guide, but they can be useful if you plan on using Linux in any capacity. These barely scratch the surface, so feel free to check out [this](https://www.digitalocean.com/community/tutorials/linux-commands) link with 50+ Linux commands.
+```sh
+ip a #Lists your IP and network interfaces
+ls #Shows what files and directories are in your current directory
+ls -l #Shows info of those files and directories such as size, permission, etc.
+cd #Change directory
+ssh user@systemIP #Secure shell, allows you to connect to a machine remotely
+mdir <dir-name>#Makes the directory in your current directory
+cp file1 file2 #Copy command, file 1 is the original, file2 is the copy
+mv file1 /to/this/directory #Move a file to another directory
+rm -rf /this/directory #Deletes files and directories
+nano myfilename.yml #Text line editor, think of it like notepad in Windows
+sudo #Runs the command as admin, be careful when using this
+lsblk #Displays disks and partitions
+chmod #Change permissions on a file or directory
+sudo apt update && sudo apt upgrade #Updates your system
+shutdown -t now #Shut the system down
+shutdown -r now #Reboots the system
+```
+
 # Hardware
 
 Ubuntu Server is a very light weight OS, the recommended system requirements are:
@@ -426,7 +452,7 @@ Deploy the stack and go to `http://serverIP:8181`, you should be able to log in 
 
 _What is Overseerr?_
 
-> Overseerr is a request management and media discovery tool built to work with your existing Plex ecosystem.
+> [Overseerr](https://docs.linuxserver.io/images/docker-overseerr/) is a request management and media discovery tool built to work with your existing Plex ecosystem.
 
 ![overseerr](https://github.com/SupraTHICC/homelab-setup/assets/92880114/a3b6c7ef-82a6-4079-8034-a9d5b4d1c398)
 
@@ -446,4 +472,66 @@ services:
       - 5055:5055
     restart: unless-stopped
 ```
-Deploy the stack and go to `http://serverIP:5055`
+Deploy the stack and go to `http://serverIP:5055` and sign in with your Plex account, now you should have the option of configuring your Plex server. Enter your server info and click save, scroll down and you should see "Plex Libraries". Next, configure your Radarr and Sonarr settings, click test and if everything is set, click add server. Once you're at the main Overseerr screen, you can enter your Tautulli settings in settings>Plex near the bottom. The API key can be found under web interface in settings on Tautulli.
+
+# Speedtest Tracker
+
+_What is Speedtest Tracker?_
+
+> [Speedtest Tracker](https://github.com/alexjustesen/speedtest-tracker) is a self-hosted internet performance tracking application that runs speedtest checks against Ookla's Speedtest service.
+
+This isn't a must have, but it's definitely a nice have. You can set it up to run a speedtest at the exact same time(s), it will track each test, output the data to a graph and it tracks it over time so you can hold your ISP accountable.
+
+![speedtest](https://github.com/SupraTHICC/homelab-setup/assets/92880114/c7d50b44-8d55-4618-9532-17782b9fe7f3)
+
+You can use the example below to get started, but I do recommend reading the installation instructions [here](https://docs.speedtest-tracker.dev/getting-started/installation) so you can check all the env variables.
+```sh
+services:
+  speedtest-tracker:
+    container_name: speedtest-tracker
+    ports:
+      - 8080:80
+      - 8443:443
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=speedtest_tracker
+      - DB_USERNAME=redacted
+      - DB_PASSWORD=redacted
+    volumes:
+      - speedtest-app:/config
+      - /home/your-username-here/containers/speedtest:/etc/ssl/web
+    image: ghcr.io/alexjustesen/speedtest-tracker:latest
+    restart: unless-stopped
+    depends_on:
+       - db
+  db:
+    image: mariadb:10
+    restart: always
+    environment:
+       - MARIADB_DATABASE=speedtest_tracker
+       - MARIADB_USER=redacted
+       - MARIADB_PASSWORD=redacted
+       - MARIADB_RANDOM_ROOT_PASSWORD=true
+    volumes:
+       - speedtest-db:/var/lib/mysql
+volumes:
+  speedtest-app:
+  speedtest-db:
+```
+Deploy the stack and head over to `http://serverIP:8080` to complete the setup. Use the admin/password you've set in the env variables from above, in general you can set the speedtest schedule by using the cron generator and which server your server should run the speedtest against. 
+
+# Nginx Proxy Manager
+
+_What is Nginx Proxy Manager?_
+
+> [This](https://nginxproxymanager.com/) project comes as a pre-built docker image that enables you to easily forward to your websites running at home or otherwise, including free SSL, without having to know too much about Nginx or Letsencrypt.
+
+And last but not least, we're going to setup Nginx Proxy Manager which will allow you to securely access some(or all) of your containers that have web UIs outside of your LAN. This container is free, however, you do need a domain to actually use it. I purchased a domain from Cloudflare for about $10 for 1 year, so it's relatively affordable. Below is the config I'm using, however, it's probably easier to get an understanding of how to get everything setup by watching a tutorial. [This](https://www.youtube.com/watch?v=h1a4u72o-64) one by IBRACORP is pretty good and should help get you up and running.
+
+# Final Thoughts
+
+Now that you have a homelab setup the fun doesn't stop there, there's a ton of containers that you can add to your server to really make it yours. A quick "homelab setup" google search will yield hundreds of results, that's actually how I found some of these containers, and if there's something you want that hasn't been containerized yet(doubt it, but maybe) you could always try making your own by following a beginner's guide like [this](https://stackify.com/docker-build-a-beginners-guide-to-building-docker-images/) one.
