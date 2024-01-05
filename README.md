@@ -9,6 +9,9 @@ I've spent quite a bit of time over the last 12 months learning docker and linux
 - Setup Portainer, Prowlarr, Sonarr, Radarr, Plex, Homarr, Watchtower, Tautulli, Overseerr, Speedtest Tracker, qBittorentVPN, Nginx Proxy Manager
 - And finally, how to access some of these services outside of your home network
 
+> [!IMPORTANT]
+> Syntax matters, if you run into any issues with the container examples below make sure to check that a _tab_ wasn't added when a _space_ was needed.
+
 ## Table of Contents
 
 - [Homelab Setup Guide - Introduction](#homelab-setup-guide---introduction)
@@ -531,6 +534,44 @@ _What is Nginx Proxy Manager?_
 > [This](https://nginxproxymanager.com/) project comes as a pre-built docker image that enables you to easily forward to your websites running at home or otherwise, including free SSL, without having to know too much about Nginx or Letsencrypt.
 
 And last but not least, we're going to setup Nginx Proxy Manager which will allow you to securely access some(or all) of your containers that have web UIs outside of your LAN. This container is free, however, you do need a domain to actually use it. I purchased a domain from Cloudflare for about $10 for 1 year, so it's relatively affordable. Below is the config I'm using, however, it's probably easier to get an understanding of how to get everything setup by watching a tutorial. [This](https://www.youtube.com/watch?v=h1a4u72o-64) one by IBRACORP is pretty good and should help get you up and running.
+```sh
+version: '3.8'
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+    environment:
+      PUID: 1000
+      PGID: 1000	  
+      DB_MYSQL_HOST: "db"
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: "npm"
+      DB_MYSQL_PASSWORD: "npm"
+      DB_MYSQL_NAME: "npm"
+      DISABLE_IPV6: 'true'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - db
+
+  db:
+    image: 'jc21/mariadb-aria:latest'
+    restart: unless-stopped
+    environment:
+      PUID: 1000
+      PGID: 1000
+      MYSQL_ROOT_PASSWORD: 'npm'
+      MYSQL_DATABASE: 'npm'
+      MYSQL_USER: 'npm'
+      MYSQL_PASSWORD: 'npm'
+    volumes:
+      - ./mysql:/var/lib/mysql
+```
 
 # Final Thoughts
 
