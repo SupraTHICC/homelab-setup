@@ -352,7 +352,7 @@ Once you're at the Sonarr UI, click settings and click indexers. If you setup an
 
 Just like Sonarr, you should fill out the same information as you did previously. Make sure to change anything that's specific to each container, such as port, if need be. Now that you have the indexers, apps, and download client set up, you should test a download to make sure everything is working. In Sonarr/Radarr, click Add new and search for a show or movie. These are the settings I typically use:
 
-![sonarr](https://github.com/SupraTHICC/homelab-setup/assets/92880114/5a0176a3-59db-44f8-ba41-f77c1c592ecf)
+![sonarr1](https://github.com/SupraTHICC/homelab-setup/assets/92880114/24c423ac-2a80-45eb-8a89-e732ca61f04c)
 
 Once you click add, go to qBittorrent and make sure it downloads. If you receive an error, SSH into your server and in your qbitvpn/qBittorent/data directory there should be a log which may help resolve the error. 
 
