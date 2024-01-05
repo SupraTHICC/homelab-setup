@@ -81,21 +81,22 @@ With your system turned off, insert the USB drive and power on your system. If y
 
 # Server Network
 
-While not entirely necessary, I've gone ahead and given my server a static IP. Most routers will allow you to do it in the gui, however, I've set it up on my server. Follow the instructions below if you'd like to do the same. First, you need to identify the available interfaces by using the command `ip a`, make note of the interface name and subnet mask your network uses. Now create the netplan config using the command `sudo nano /etc/netplan/99_config.yaml`. I've provided my config below as an example, but you will need to change things to suite your network:
+While not entirely necessary, I've gone ahead and given my server a static IP. Most routers will allow you to do it in the gui, however, I've set it up on my server. Follow the instructions below if you'd like to do the same. First, you need to identify the available interfaces by using the command `ip a`, make note of the interface name and subnet mask your network uses. Now create the netplan config using the command `sudo nano /etc/netplan/00-installer-config.yaml`. I've provided my config below as an example, but you will need to change things to suite your network:
 ```sh
 network:
   renderer: networkd
   ethernets:
-    enp42s0:
+    enter-your-network-interface-here:
       addresses:
         - 192.168.X.X/XX
       nameservers:
-        addresses: [4.2.2.2, 8.8.8.8]
+        addresses: [4.2.2.2, 8.8.8.8] #these can be changed to DNS servers of your choice
       routes:
         - to: default
-          via: 192.168.X.X
+          via: 192.168.X.X #This should be the IP of your router i.e 192.168.1.1
   version: 2
 ```
+Once you've added your network config, enter the command `sudo netplan try`. If your settings are fine, hit enter to apply them.
 
 # Firewall
 
