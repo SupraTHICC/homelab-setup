@@ -292,7 +292,7 @@ _What is qBittorentVPN?_
 
 The qBittorrentVPN docker hub can be found [here](https://hub.docker.com/r/dyonr/qbittorrentvpn/) which provides a lot of information and the environment variables that can be used. For this container you will need to have a VPN, if you choose to go with OpenVPN like I have you can find a list of supported VPN providers [here](https://haugene.github.io/docker-transmission-openvpn/supported-providers/). I use NordVPN, I know there are _better_ alternatives available but it's just what I'm used to, as well as OpenVPN. 
 
-First. create a new directory in the qbitvpn directory and name it openvpn, you will then need to get .ovpn files from your VPN provider and copy them to the openvpn. Make sure they're named exactly how they were named when you got them from your VPN provider. In the Portainer UI, click add a stack and name this one qbitvpn. Below is an example of my settings which you will need to modify with your VPN providers info:
+First. create a new directory in the qbitvpn directory and name it openvpn, you will then need to get .ovpn files from your VPN provider and copy them to the openvpn directory. You can simply use the command `sudo nano #my-ovpn-config-file.ovpn` then copy and paste the information if you're SSH'd, make sure they're named exactly how they were named when you got them from your VPN provider. In the Portainer UI, click add a stack and name this one qbitvpn. Below is an example of my settings which you will need to modify with your VPN providers info:
 ```sh
 services:
   qbitvpn:
