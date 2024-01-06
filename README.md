@@ -335,7 +335,7 @@ Next we'll be going back to Prowlarr, Sonarr, and Radarr to finalize the setting
 # Arr Settings
 
 > [!IMPORTANT]
-> In order to get the Arr containers to talk to eachother, you will need to add the ports to UFW with the command `sudo ufw allow #port-number-here`.
+> In order to get your containers to talk to eachother, you will need to add the ports to UFW with the command `sudo ufw allow #port-number-here`.
 
 ## Prowlarr Settings
 
@@ -389,7 +389,7 @@ services:
         - 32400:32400
     restart: unless-stopped
 ```
-Deploy the stack but this time instead of going to Plex in a browser, open CMD/PS and enter the following `ssh -L32400:localhost:32400 your-username@serverIP`. This will create a tunnel into your server, and you can now configure Plex. Once you're at `http://serverIP:32400` you'll need to create an account, if you don't currently have one, and then give your server a name once you've claimed it. When adding your libaries, make sure to point the movies library to `/media/movies` and the TV library to `/media/tv`. I haven't change much settings wise in Plex, other than allowing others access to my media. A couple of settings you should look at is "scan my library automatically" and remote access, other than that I usually leave all the settings on default. 
+Deploy the stack but this time instead of going to Plex in a browser, open a new CMD/PS and enter the following `ssh -L32400:localhost:32400 your-username@serverIP`. This will create a tunnel into your server, and you can now configure Plex. Once you're at `http://serverIP:32400/web` you'll need to create an account, if you don't currently have one, and then give your server a name once you've claimed it. When adding your libaries, make sure to point the movies library to `/media/movies` and the TV library to `/media/tv`. I haven't changed much settings wise in Plex, other than allowing others access to my media. A couple of settings you should look at is "scan my library automatically" and remote access, other than that I usually leave all the settings on default. 
 
 # Homarr
 
@@ -399,7 +399,7 @@ _What is Homarr?_
 
 ![homarr](https://github.com/SupraTHICC/homelab-setup/assets/92880114/ffb31516-f7f5-49a5-a788-b9297e6d852b)
 
-Homarr is one of the more recent additions to my homelab, and I can't believe I've gone this long without it. You can enable pings for the apps that you add which will show if they're up or down, the calendar will show up coming release dates for series you have monitored, what's playing on plex and by whom, just to name a few of its features. Add a stack, name it Homarr, and you can use the example below as a starting point:
+Homarr is one of the more recent additions to my homelab, and I can't believe I've gone this long without it. You can enable pings for the apps that you add which will show if they're up or down, the calendar will show up coming release dates for series you have monitored, what's playing on plex and by whom, just to name a few of its features. Add a stack, name it homarr, and you can use the example below as a starting point:
 ```sh
 services:
   homarr:
@@ -456,7 +456,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=#Enter your time zone
+      - TZ= #Enter your time zone
     ports:
       - 8181:8181
 ```
@@ -479,9 +479,9 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=#Enter your time zone
+      - TZ= #Enter your time zone
     volumes:
-      - home/your-username-here/containers/overseerr:/config
+      - /home/your-username-here/containers/overseerr:/config
     ports:
       - 5055:5055
     restart: unless-stopped
@@ -513,8 +513,8 @@ services:
       - DB_HOST=db
       - DB_PORT=3306
       - DB_DATABASE=speedtest_tracker
-      - DB_USERNAME=redacted
-      - DB_PASSWORD=redacted
+      - DB_USERNAME=speedy
+      - DB_PASSWORD=password
     volumes:
       - speedtest-app:/config
       - /home/your-username-here/containers/speedtest:/etc/ssl/web
@@ -527,8 +527,8 @@ services:
     restart: always
     environment:
        - MARIADB_DATABASE=speedtest_tracker
-       - MARIADB_USER=redacted
-       - MARIADB_PASSWORD=redacted
+       - MARIADB_USER=speedy
+       - MARIADB_PASSWORD=password
        - MARIADB_RANDOM_ROOT_PASSWORD=true
     volumes:
        - speedtest-db:/var/lib/mysql
@@ -536,7 +536,7 @@ volumes:
   speedtest-app:
   speedtest-db:
 ```
-Deploy the stack and head over to `http://serverIP:8080` to complete the setup. Use the admin/password you've set in the env variables from above, in general you can set the speedtest schedule by using the cron generator and which server your server should run the speedtest against. 
+Deploy the stack and head over to `http://serverIP:8080` to complete the setup. Use the default login information `username: admin@example.com password: password` and then update this information in the users section. In general settings you can set the speedtest schedule by using the cron generator and which server your server should run the speedtest against. 
 
 # Nginx Proxy Manager
 
@@ -583,6 +583,7 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
 ```
+Deploy the stack and head over to `http://serverIP:81` to complete the setup. Use the default login information `username: admin@example.com password: changeme` and then update the login with your information. Once you're logged in you can follow the guide I linked to above, you should then be able to add a secure way to access your server outside of your LAN. 
 
 # Final Thoughts
 
