@@ -338,6 +338,9 @@ Next we'll be going back to Prowlarr, Sonarr, and Radarr to finalize the setting
 
 # Arr Settings
 
+> [!IMPORTANT]
+> In order to get the Arr containers to talk to eachother, you will need to add the ports to UFW with the command `sudo ufw allow #port-number-here`.
+
 ## Prowlarr Settings
 
 Now that we've got our main containers set up, we need to go back to add some things that we couldn't add before. First, go to Prowlarr and click settings then apps. Once there, click the + to add an app and select Radarr. Fill in the fields so they look similar to this:
