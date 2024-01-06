@@ -153,16 +153,12 @@ sudo docker run hello-world
 ```
 Now update the package and install the latest version of Docker Compose:
 ```sh
-sudo apt-get update
-sudo apt-get install docker-compose-plugin
+sudo apt update
+sudo apt install docker-compose
 ```
 And verify it has been installed correctly:
 ```sh
 docker compose version
-```
-Then run
-```sh
-sudo apt install docker-compose
 ```
 And finally, add your user to the docker group
 ```sh
